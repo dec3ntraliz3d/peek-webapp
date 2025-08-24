@@ -15,7 +15,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onBack }) => {
     
     // Check if we're in a PWA on iOS Safari
     const isIOSPWA = () => {
-      return window.navigator.standalone === true && 
+      return (window.navigator as any).standalone === true && 
              /iPad|iPhone|iPod/.test(navigator.userAgent);
     };
     
