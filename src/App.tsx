@@ -25,9 +25,20 @@ function App() {
   };
 
   const handleReconfigure = () => {
-    clearStorageConfig();
-    setIsConfigured(false);
-    setCurrentScreen('setup');
+    const confirmed = window.confirm(
+      'Are you sure you want to reset GitHub settings?\n\n' +
+      'This will:\n' +
+      '• Delete your stored GitHub token\n' +
+      '• Remove repository configuration\n' +
+      '• Require you to re-enter your credentials\n\n' +
+      'Your box data will remain safe in your GitHub repository.'
+    );
+    
+    if (confirmed) {
+      clearStorageConfig();
+      setIsConfigured(false);
+      setCurrentScreen('setup');
+    }
   };
 
   const loadBoxItems = async (boxId: string) => {
