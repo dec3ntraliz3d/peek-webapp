@@ -40,8 +40,8 @@ export class GitHubStorage {
       const url = `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${this.fileName}`;
       const data = await this.makeRequest(url);
       
-      // Decode base64 content
-      const content = atob(data.content);
+      // Decode base64 content with proper UTF-8 handling
+      const content = decodeURIComponent(escape(atob(data.content)));
       const parsed = JSON.parse(content);
       
       // Migrate old format (string[]) to new format ({ items: string[], description?: string })
@@ -77,8 +77,9 @@ export class GitHubStorage {
         // File doesn't exist yet, that's fine
       }
 
-      // Encode content as base64
-      const content = btoa(JSON.stringify(boxData, null, 2));
+      // Encode content as base64 with proper UTF-8 handling
+      const jsonString = JSON.stringify(boxData, null, 2);
+      const content = btoa(unescape(encodeURIComponent(jsonString)));
 
       const body = {
         message: `Update box data - ${new Date().toISOString()}`,
@@ -124,16 +125,20 @@ export class GitHubStorage {
       if (!boxData[boxId]) {
         boxData[boxId] = { items: [] };
       } else if (!boxData[boxId].items) {
-        // This should not happen due to getBoxData migration, but just in case
-        console.error('Box data is in unexpected format:', boxData[boxId]);
-        throw new Error('Box data format error. Please try refreshing the page.');
+        // Force migration if somehow still in old format
+        const oldItems = Array.isArray(boxData[boxId]) ? boxData[boxId] as unknown as string[] : [];
+        boxData[boxId] = { items: oldItems };
       }
       
       boxData[boxId].description = description;
       await this.saveBoxData(boxData);
     } catch (error) {
       console.error('Error setting box description:', error);
-      throw error;
+      if (error instanceof Error) {
+        throw new Error(`Failed to save description: ${error.message}`);
+      } else {
+        throw new Error('Failed to save description: Unknown error');
+      }
     }
   }
 
