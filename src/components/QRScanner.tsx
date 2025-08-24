@@ -14,12 +14,29 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onBack }) => {
 
   const checkCameraPermission = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      // Check if we already have permission stored
+      if (navigator.permissions) {
+        const permissionStatus = await navigator.permissions.query({ name: 'camera' as PermissionName });
+        if (permissionStatus.state === 'granted') {
+          setHasPermission(true);
+          return true;
+        }
+      }
+
+      // Test camera access
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: "environment" } 
+      });
       stream.getTracks().forEach(track => track.stop());
       setHasPermission(true);
+      
+      // Store permission status in sessionStorage for PWA
+      sessionStorage.setItem('camera_permission_granted', 'true');
       return true;
     } catch (err) {
+      console.log('Camera permission check failed:', err);
       setHasPermission(false);
+      sessionStorage.removeItem('camera_permission_granted');
       return false;
     }
   };
@@ -54,7 +71,23 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onBack }) => {
 
     const onScanSuccess = (decodedText: string) => {
       setIsScanning(false);
-      scanner.clear();
+      
+      // Immediately stop the camera and clear the scanner
+      try {
+        scanner.clear();
+        
+        // Also stop any remaining camera streams
+        const videoElement = document.querySelector('#qr-reader video') as HTMLVideoElement;
+        if (videoElement?.srcObject) {
+          const stream = videoElement.srcObject as MediaStream;
+          stream.getTracks().forEach(track => {
+            track.stop();
+          });
+        }
+      } catch (err) {
+        console.error('Error stopping camera:', err);
+      }
+      
       onScan(decodedText);
     };
 
@@ -89,19 +122,37 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onBack }) => {
   };
 
   useEffect(() => {
-    checkCameraPermission().then(granted => {
-      if (granted) {
-        initializeScanner();
-      }
-    });
+    // Check if we had permission in this session first
+    const hadPermission = sessionStorage.getItem('camera_permission_granted') === 'true';
+    
+    if (hadPermission) {
+      setHasPermission(true);
+      initializeScanner();
+    } else {
+      checkCameraPermission().then(granted => {
+        if (granted) {
+          initializeScanner();
+        }
+      });
+    }
 
     return () => {
+      // More thorough cleanup
       if (scannerRef.current) {
         try {
           scannerRef.current.clear();
         } catch (err) {
           console.error('Error clearing scanner:', err);
         }
+      }
+      
+      // Stop any remaining camera streams
+      const videoElement = document.querySelector('#qr-reader video') as HTMLVideoElement;
+      if (videoElement?.srcObject) {
+        const stream = videoElement.srcObject as MediaStream;
+        stream.getTracks().forEach(track => {
+          track.stop();
+        });
       }
     };
   }, []);
@@ -114,6 +165,16 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onBack }) => {
         console.error('Error clearing scanner:', err);
       }
     }
+    
+    // Stop camera streams when going back
+    const videoElement = document.querySelector('#qr-reader video') as HTMLVideoElement;
+    if (videoElement?.srcObject) {
+      const stream = videoElement.srcObject as MediaStream;
+      stream.getTracks().forEach(track => {
+        track.stop();
+      });
+    }
+    
     onBack();
   };
 
