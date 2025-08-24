@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Peek - Box Contents Tracker</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Mobile optimizations -->
+    <meta name="theme-color" content="#007AFF" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Peek" />
+    
+    <!-- Preconnect to external domains for performance -->
+    <link rel="preconnect" href="https://api.github.com" />
+    
+    <!-- Description and keywords for SEO -->
+    <meta name="description" content="Track what's inside your boxes using QR codes. Scan, organize, and manage your storage with GitHub-powered data sync." />
+    <meta name="keywords" content="box tracker, QR code, storage, organization, inventory" />
+    
+    <!-- Prevent iOS zoom on input focus -->
+    <style>
+      @media screen and (max-width: 767px) {
+        input, textarea, select {
+          font-size: 16px !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
+  </body>
+</html>
