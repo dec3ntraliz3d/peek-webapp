@@ -251,21 +251,26 @@ body {
   flex-direction: column;
   background: #000;
   color: white;
+  min-height: 100vh;
 }
 
 .scanner-header {
   display: flex;
   align-items: center;
   padding: 20px;
-  background: rgba(0, 0, 0, 0.8);
-  position: relative;
+  background: rgba(0, 0, 0, 0.9);
+  position: sticky;
+  top: 0;
   z-index: 10;
+  backdrop-filter: blur(10px);
 }
 
 .scanner-header h2 {
   flex: 1;
   text-align: center;
   margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
 }
 
 .back-btn {
@@ -273,8 +278,14 @@ body {
   border: none;
   color: #007AFF;
   font-size: 1rem;
-  padding: 8px 0;
+  padding: 12px 0;
   cursor: pointer;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.back-btn:hover {
+  opacity: 0.8;
 }
 
 .scanner-content {
@@ -282,31 +293,214 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   padding: 20px;
+  position: relative;
 }
 
-.scanner-content p {
+.scanner-instructions {
   text-align: center;
-  margin-bottom: 20px;
-  color: #ccc;
+  margin-bottom: 24px;
+}
+
+.scanner-instructions p {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0;
 }
 
 .qr-reader {
   width: 100%;
-  max-width: 400px;
-  border-radius: 16px;
+  max-width: 350px;
+  border-radius: 20px;
   overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
-.scanner-info {
-  margin-top: 20px;
+/* Permission Request Styles */
+.permission-request {
   text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 40px 32px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: 320px;
 }
 
-.scanner-info p {
-  margin-bottom: 8px;
+.permission-icon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+}
+
+.permission-request h3 {
+  margin-bottom: 12px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.permission-request p {
   color: #ccc;
-  font-size: 0.9rem;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.permission-btn {
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 24px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.permission-btn:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+.permission-btn:active {
+  transform: translateY(0);
+}
+
+/* Loading Styles */
+.scanner-loading {
+  text-align: center;
+  color: #fff;
+  padding: 40px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid #007AFF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.scanner-loading p {
+  color: #ccc;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Error Styles */
+.scanner-error {
+  text-align: center;
+  background: rgba(220, 53, 69, 0.1);
+  border-radius: 16px;
+  padding: 32px 24px;
+  max-width: 320px;
+  border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.error-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.scanner-error p {
+  color: #fff;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.retry-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.retry-btn:hover {
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
+/* Scanner Tips */
+.scanner-tips {
+  position: absolute;
+  bottom: 40px;
+  left: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 12px;
+  padding: 16px 20px;
+  backdrop-filter: blur(10px);
+}
+
+.tip {
+  color: #ccc;
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tip:last-child {
+  margin-bottom: 0;
+}
+
+/* Hide html5-qrcode UI elements we don't want */
+#qr-reader__dashboard_section_csr {
+  display: none !important;
+}
+
+#qr-reader__header_message {
+  display: none !important;
+}
+
+#qr-reader__dashboard_section {
+  display: none !important;
+}
+
+#qr-reader__camera_selection_container {
+  display: none !important;
+}
+
+#qr-reader__camera_selection {
+  display: none !important;
+}
+
+#qr-reader__dashboard_section_fsr {
+  display: none !important;
+}
+
+#qr-reader__scan_region {
+  border: none !important;
+}
+
+/* Hide start scanning button and other controls */
+button[data-action="start"] {
+  display: none !important;
+}
+
+button[data-action="stop"] {
+  display: none !important;
+}
+
+/* Clean up the scanner UI */
+#qr-reader__scan_region {
+  margin: 0 !important;
 }
 
 /* QR Generator Styles */
