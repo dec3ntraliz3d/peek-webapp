@@ -12,12 +12,18 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ onBack }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const generateQR = async () => {
-    if (!boxId.trim()) return;
+    if (!boxId.trim()) {
+      console.log('No box ID provided');
+      return;
+    }
 
+    console.log('Generating QR for box ID:', boxId.trim());
     setIsGenerating(true);
     try {
       const canvas = canvasRef.current;
+      console.log('Canvas element:', canvas);
       if (canvas) {
+        console.log('Generating QR to canvas...');
         await QRCode.toCanvas(canvas, boxId.trim(), {
           width: 256,
           margin: 2,
@@ -26,16 +32,22 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ onBack }) => {
             light: '#FFFFFF'
           }
         });
+        console.log('Canvas QR generated successfully');
         
         // Also generate a data URL for download
+        console.log('Generating data URL...');
         const url = await QRCode.toDataURL(boxId.trim(), {
           width: 512,
           margin: 2,
         });
+        console.log('Data URL generated:', url.substring(0, 50) + '...');
         setQrCodeUrl(url);
+      } else {
+        console.error('Canvas ref is null');
       }
     } catch (error) {
       console.error('Error generating QR code:', error);
+      alert('Error generating QR code: ' + (error as Error).message);
     } finally {
       setIsGenerating(false);
     }
@@ -147,12 +159,11 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ onBack }) => {
           </button>
         </div>
 
-        {qrCodeUrl && (
-          <div className="qr-result">
-            <div className="qr-display">
-              <canvas ref={canvasRef} className="qr-canvas"></canvas>
-              <p className="box-label">Box: {boxId}</p>
-            </div>
+        <div className="qr-result" style={{ display: qrCodeUrl ? 'block' : 'none' }}>
+          <div className="qr-display">
+            <canvas ref={canvasRef} className="qr-canvas"></canvas>
+            <p className="box-label">Box: {boxId}</p>
+          </div>
 
             <div className="qr-actions">
               <button onClick={printQR} className="action-btn print-btn">
@@ -173,7 +184,6 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ onBack }) => {
               </ul>
             </div>
           </div>
-        )}
       </div>
     </div>
   );
