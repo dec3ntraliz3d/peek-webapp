@@ -8,136 +8,61 @@ interface QRScannerProps {
 
 const QRScanner: React.FC<QRScannerProps> = ({ onScan, onBack }) => {
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
-  const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState('');
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
 
-  const checkCameraPermission = async () => {
-    try {
-      // Check if we already have permission stored
-      if (navigator.permissions) {
-        const permissionStatus = await navigator.permissions.query({ name: 'camera' as PermissionName });
-        if (permissionStatus.state === 'granted') {
-          setHasPermission(true);
-          return true;
-        }
-      }
-
-      // Test camera access
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: "environment" } 
-      });
-      stream.getTracks().forEach(track => track.stop());
-      setHasPermission(true);
-      
-      // Store permission status in sessionStorage for PWA
-      sessionStorage.setItem('camera_permission_granted', 'true');
-      return true;
-    } catch (err) {
-      console.log('Camera permission check failed:', err);
-      setHasPermission(false);
-      sessionStorage.removeItem('camera_permission_granted');
-      return false;
-    }
-  };
-
-  const requestPermission = async () => {
-    const granted = await checkCameraPermission();
-    if (granted) {
-      initializeScanner();
-    }
-  };
-
-  const initializeScanner = () => {
+  useEffect(() => {
     const config = {
       fps: 10,
       qrbox: { width: 280, height: 280 },
       aspectRatio: 1.0,
+      facingMode: "environment",
       showTorchButtonIfSupported: true,
       showZoomSliderIfSupported: false,
-      defaultZoomValueIfSupported: 1,
-      facingMode: "environment", // Always use back camera
       rememberLastUsedCamera: false,
-      showCameraSelection: false, // Hide camera selection
     };
 
     const scanner = new Html5QrcodeScanner(
       'qr-reader',
       config,
-      true // verbose mode off to reduce UI clutter
+      false
     );
 
     scannerRef.current = scanner;
 
     const onScanSuccess = (decodedText: string) => {
-      setIsScanning(false);
+      // Stop scanner immediately
+      scanner.clear();
       
-      // Immediately stop the camera and clear the scanner
-      try {
-        scanner.clear();
-        
-        // Also stop any remaining camera streams
-        const videoElement = document.querySelector('#qr-reader video') as HTMLVideoElement;
-        if (videoElement?.srcObject) {
-          const stream = videoElement.srcObject as MediaStream;
-          stream.getTracks().forEach(track => {
-            track.stop();
-          });
-        }
-      } catch (err) {
-        console.error('Error stopping camera:', err);
+      // Stop any video streams
+      const videoElement = document.querySelector('#qr-reader video') as HTMLVideoElement;
+      if (videoElement?.srcObject) {
+        const stream = videoElement.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop());
       }
       
       onScan(decodedText);
     };
 
     const onScanError = (errorMessage: string) => {
-      // Filter out common scanning errors that aren't real issues
+      // Only show real errors, not scanning attempts
       if (errorMessage.includes('NotFoundException') || 
           errorMessage.includes('No MultiFormat Readers') ||
           errorMessage.includes('parse error')) {
         return;
       }
-      setError(getFriendlyErrorMessage(errorMessage));
+      
+      if (errorMessage.includes('NotAllowedError') || errorMessage.includes('Permission denied')) {
+        setError('Camera access denied. Please allow camera permissions in your browser settings.');
+      } else if (errorMessage.includes('NotFoundError')) {
+        setError('No camera found on this device.');
+      } else {
+        setError('Camera error. Please try again.');
+      }
     };
 
     scanner.render(onScanSuccess, onScanError);
-    setIsScanning(true);
-  };
-
-  const getFriendlyErrorMessage = (error: string): string => {
-    if (error.includes('NotAllowedError') || error.includes('Permission denied')) {
-      return 'Camera access denied. Please allow camera permissions and try again.';
-    }
-    if (error.includes('NotFoundError')) {
-      return 'No camera found. Please make sure your device has a camera.';
-    }
-    if (error.includes('NotReadableError')) {
-      return 'Camera is busy or not accessible. Please try again.';
-    }
-    if (error.includes('OverconstrainedError')) {
-      return 'Camera constraints not supported. Please try a different camera.';
-    }
-    return 'Unable to scan QR code. Make sure the code is clear and well-lit.';
-  };
-
-  useEffect(() => {
-    // Check if we had permission in this session first
-    const hadPermission = sessionStorage.getItem('camera_permission_granted') === 'true';
-    
-    if (hadPermission) {
-      setHasPermission(true);
-      initializeScanner();
-    } else {
-      checkCameraPermission().then(granted => {
-        if (granted) {
-          initializeScanner();
-        }
-      });
-    }
 
     return () => {
-      // More thorough cleanup
       if (scannerRef.current) {
         try {
           scannerRef.current.clear();
@@ -146,16 +71,14 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onBack }) => {
         }
       }
       
-      // Stop any remaining camera streams
+      // Clean up video streams
       const videoElement = document.querySelector('#qr-reader video') as HTMLVideoElement;
       if (videoElement?.srcObject) {
         const stream = videoElement.srcObject as MediaStream;
-        stream.getTracks().forEach(track => {
-          track.stop();
-        });
+        stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, []);
+  }, [onScan]);
 
   const handleBack = () => {
     if (scannerRef.current) {
@@ -166,13 +89,11 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onBack }) => {
       }
     }
     
-    // Stop camera streams when going back
+    // Clean up video streams
     const videoElement = document.querySelector('#qr-reader video') as HTMLVideoElement;
     if (videoElement?.srcObject) {
       const stream = videoElement.srcObject as MediaStream;
-      stream.getTracks().forEach(track => {
-        track.stop();
-      });
+      stream.getTracks().forEach(track => track.stop());
     }
     
     onBack();
@@ -188,56 +109,27 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onBack }) => {
       </div>
 
       <div className="scanner-content">
-        {hasPermission === false && (
-          <div className="permission-request">
-            <div className="permission-icon">📷</div>
-            <h3>Camera Access Required</h3>
-            <p>To scan QR codes, we need access to your camera.</p>
-            <button onClick={requestPermission} className="permission-btn">
-              Allow Camera Access
-            </button>
-          </div>
-        )}
-
-        {hasPermission === true && !isScanning && !error && (
-          <div className="scanner-loading">
-            <div className="loading-spinner"></div>
-            <p>Starting camera...</p>
-          </div>
-        )}
-
-        {hasPermission === true && (
-          <>
-            <div className="scanner-instructions">
-              <p>Point your camera at a QR code</p>
-            </div>
-            <div id="qr-reader" className="qr-reader"></div>
-          </>
-        )}
+        <div className="scanner-instructions">
+          <p>Point your camera at a QR code</p>
+        </div>
+        
+        <div id="qr-reader" className="qr-reader"></div>
         
         {error && (
           <div className="scanner-error">
             <div className="error-icon">⚠️</div>
             <p>{error}</p>
-            <button onClick={() => {
-              setError('');
-              setHasPermission(null);
-              checkCameraPermission().then(granted => {
-                if (granted) initializeScanner();
-              });
-            }} className="retry-btn">
+            <button onClick={() => setError('')} className="retry-btn">
               Try Again
             </button>
           </div>
         )}
-
-        {hasPermission === true && isScanning && (
-          <div className="scanner-tips">
-            <div className="tip">💡 Hold your device steady</div>
-            <div className="tip">💡 Ensure good lighting</div>
-            <div className="tip">💡 Position QR code within the frame</div>
-          </div>
-        )}
+        
+        <div className="scanner-tips">
+          <div className="tip">💡 Hold your device steady</div>
+          <div className="tip">💡 Ensure good lighting</div>
+          <div className="tip">💡 Position QR code within the frame</div>
+        </div>
       </div>
     </div>
   );
