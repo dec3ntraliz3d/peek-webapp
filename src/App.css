@@ -652,6 +652,111 @@ button[data-action="stop"] {
   margin-bottom: 8px;
 }
 
+/* Description Section Styles */
+.description-section {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.description-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.description-header label {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+}
+
+.edit-description-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.edit-description-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.description-display {
+  padding: 12px 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #444;
+  min-height: 24px;
+}
+
+.description-placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+.description-edit {
+  margin-top: 8px;
+}
+
+.description-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.description-textarea:focus {
+  border-color: #007AFF;
+}
+
+.description-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.save-btn, .cancel-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.save-btn {
+  background-color: #007AFF;
+  color: white;
+}
+
+.save-btn:hover {
+  background-color: #0056b3;
+}
+
+.cancel-btn {
+  background-color: #f8f9fa;
+  color: #666;
+  border: 1px solid #e0e0e0;
+}
+
+.cancel-btn:hover {
+  background-color: #e9ecef;
+}
+
 /* Box Contents Styles */
 .box-contents-container {
   flex: 1;

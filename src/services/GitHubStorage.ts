@@ -119,9 +119,16 @@ export class GitHubStorage {
   async setBoxDescription(boxId: string, description: string): Promise<void> {
     try {
       const boxData = await this.getBoxData();
+      
+      // Ensure the box exists in new format
       if (!boxData[boxId]) {
         boxData[boxId] = { items: [] };
+      } else if (!boxData[boxId].items) {
+        // This should not happen due to getBoxData migration, but just in case
+        console.error('Box data is in unexpected format:', boxData[boxId]);
+        throw new Error('Box data format error. Please try refreshing the page.');
       }
+      
       boxData[boxId].description = description;
       await this.saveBoxData(boxData);
     } catch (error) {
