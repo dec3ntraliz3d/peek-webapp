@@ -54,10 +54,39 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ onBack }) => {
   };
 
   const downloadQR = () => {
-    if (!qrCodeUrl) return;
+    if (!canvasRef.current) return;
 
+    // Create a new canvas with text
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const qrCanvas = canvasRef.current;
+    const padding = 40;
+    const textHeight = 60;
+    
+    canvas.width = qrCanvas.width + (padding * 2);
+    canvas.height = qrCanvas.height + textHeight + (padding * 2);
+    
+    // White background
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw QR code
+    ctx.drawImage(qrCanvas, padding, padding);
+    
+    // Add text
+    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Box: ${boxId}`, canvas.width / 2, qrCanvas.height + padding + 30);
+    
+    ctx.font = '16px Arial';
+    ctx.fillText('Scan with Peek app', canvas.width / 2, qrCanvas.height + padding + 50);
+    
+    // Download
     const link = document.createElement('a');
-    link.href = qrCodeUrl;
+    link.href = canvas.toDataURL();
     link.download = `box-${boxId}-qr.png`;
     link.click();
   };
@@ -162,7 +191,10 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ onBack }) => {
         <div className="qr-result" style={{ display: qrCodeUrl ? 'block' : 'none' }}>
           <div className="qr-display">
             <canvas ref={canvasRef} className="qr-canvas"></canvas>
-            <p className="box-label">Box: {boxId}</p>
+            <div className="box-label">
+              <h3>Box: {boxId}</h3>
+              <p>Scan with Peek app</p>
+            </div>
           </div>
 
             <div className="qr-actions">
