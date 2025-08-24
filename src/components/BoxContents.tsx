@@ -26,6 +26,7 @@ const BoxContents: React.FC<BoxContentsProps> = ({
   const [removingItem, setRemovingItem] = useState<string | null>(null);
   const [editingDescription, setEditingDescription] = useState(false);
   const [tempDescription, setTempDescription] = useState(description);
+  const [descriptionError, setDescriptionError] = useState('');
 
   const handleAddItem = async () => {
     if (!newItem.trim() || isAdding) return;
@@ -63,18 +64,21 @@ const BoxContents: React.FC<BoxContentsProps> = ({
   };
 
   const handleSaveDescription = async () => {
+    setDescriptionError(''); // Clear any previous errors
     try {
       await onUpdateDescription(boxId, tempDescription);
       setEditingDescription(false);
     } catch (error) {
       console.error('Error updating description:', error);
-      alert('Failed to update description. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setDescriptionError(`Error: ${errorMessage}`);
     }
   };
 
   const handleCancelDescription = () => {
     setTempDescription(description);
     setEditingDescription(false);
+    setDescriptionError(''); // Clear errors when canceling
   };
 
   // Update temp description when prop changes
@@ -126,6 +130,14 @@ const BoxContents: React.FC<BoxContentsProps> = ({
                 ❌ Cancel
               </button>
             </div>
+            {descriptionError && (
+              <div className="description-error">
+                <p>❌ {descriptionError}</p>
+                <button onClick={() => setDescriptionError('')} className="error-dismiss">
+                  Dismiss
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="description-display">

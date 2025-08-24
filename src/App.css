@@ -757,6 +757,35 @@ button[data-action="stop"] {
   background-color: #e9ecef;
 }
 
+.description-error {
+  margin-top: 12px;
+  padding: 12px;
+  background-color: #fee;
+  border: 1px solid #fcc;
+  border-radius: 6px;
+  color: #c33;
+}
+
+.description-error p {
+  margin: 0 0 8px 0;
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
+.error-dismiss {
+  background: #c33;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.error-dismiss:hover {
+  background: #a22;
+}
+
 /* Box Contents Styles */
 .box-contents-container {
   flex: 1;
