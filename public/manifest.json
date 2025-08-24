@@ -8,6 +8,7 @@
   "theme_color": "#007AFF",
   "orientation": "portrait",
   "categories": ["productivity", "utilities"],
+  "permissions": ["camera"],
   "icons": [
     {
       "src": "/icon-192.png",
