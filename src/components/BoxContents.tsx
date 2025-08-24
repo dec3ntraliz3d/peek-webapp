@@ -3,8 +3,10 @@ import React, { useState } from 'react';
 interface BoxContentsProps {
   boxId: string;
   items: string[];
+  description: string;
   onAddItem: (boxId: string, item: string) => Promise<void>;
   onRemoveItem: (boxId: string, item: string) => Promise<void>;
+  onUpdateDescription: (boxId: string, description: string) => Promise<void>;
   onBack: () => void;
   isLoading?: boolean;
 }
@@ -12,14 +14,18 @@ interface BoxContentsProps {
 const BoxContents: React.FC<BoxContentsProps> = ({
   boxId,
   items,
+  description,
   onAddItem,
   onRemoveItem,
+  onUpdateDescription,
   onBack,
   isLoading = false
 }) => {
   const [newItem, setNewItem] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [removingItem, setRemovingItem] = useState<string | null>(null);
+  const [editingDescription, setEditingDescription] = useState(false);
+  const [tempDescription, setTempDescription] = useState(description);
 
   const handleAddItem = async () => {
     if (!newItem.trim() || isAdding) return;
@@ -56,6 +62,26 @@ const BoxContents: React.FC<BoxContentsProps> = ({
     }
   };
 
+  const handleSaveDescription = async () => {
+    try {
+      await onUpdateDescription(boxId, tempDescription);
+      setEditingDescription(false);
+    } catch (error) {
+      console.error('Error updating description:', error);
+      alert('Failed to update description. Please try again.');
+    }
+  };
+
+  const handleCancelDescription = () => {
+    setTempDescription(description);
+    setEditingDescription(false);
+  };
+
+  // Update temp description when prop changes
+  React.useEffect(() => {
+    setTempDescription(description);
+  }, [description]);
+
   return (
     <div className="box-contents-container">
       <div className="box-header">
@@ -66,6 +92,50 @@ const BoxContents: React.FC<BoxContentsProps> = ({
           <h2>📦 {boxId}</h2>
           <span className="item-count">{items.length} items</span>
         </div>
+      </div>
+
+      <div className="description-section">
+        <div className="description-header">
+          <label>📝 Description</label>
+          {!editingDescription && (
+            <button 
+              onClick={() => setEditingDescription(true)}
+              className="edit-description-btn"
+              title="Edit description"
+            >
+              ✏️
+            </button>
+          )}
+        </div>
+        
+        {editingDescription ? (
+          <div className="description-edit">
+            <textarea
+              value={tempDescription}
+              onChange={(e) => setTempDescription(e.target.value)}
+              placeholder="Add a description for this box..."
+              className="description-textarea"
+              rows={3}
+              autoFocus
+            />
+            <div className="description-buttons">
+              <button onClick={handleSaveDescription} className="save-btn">
+                💾 Save
+              </button>
+              <button onClick={handleCancelDescription} className="cancel-btn">
+                ❌ Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="description-display">
+            {description || (
+              <span className="description-placeholder">
+                Click ✏️ to add a description for this box
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="add-item-section">

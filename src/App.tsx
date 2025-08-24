@@ -13,6 +13,7 @@ function App() {
   const [isConfigured, setIsConfigured] = useState(false);
   const [currentBoxId, setCurrentBoxId] = useState('');
   const [boxItems, setBoxItems] = useState<string[]>([]);
+  const [boxDescription, setBoxDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -46,7 +47,9 @@ function App() {
     try {
       const storage = getStorageService();
       const items = await storage.getBoxItems(boxId);
+      const description = await storage.getBoxDescription(boxId);
       setBoxItems(items);
+      setBoxDescription(description);
     } catch (error) {
       console.error('Error loading box items:', error);
       alert('Failed to load box items. Please check your connection.');
@@ -71,6 +74,12 @@ function App() {
     const storage = getStorageService();
     await storage.removeItemFromBox(boxId, item);
     await loadBoxItems(boxId);
+  };
+
+  const handleUpdateDescription = async (boxId: string, description: string) => {
+    const storage = getStorageService();
+    await storage.setBoxDescription(boxId, description);
+    setBoxDescription(description);
   };
 
   const renderHomeScreen = () => (
@@ -128,8 +137,10 @@ function App() {
           <BoxContents
             boxId={currentBoxId}
             items={boxItems}
+            description={boxDescription}
             onAddItem={handleAddItem}
             onRemoveItem={handleRemoveItem}
+            onUpdateDescription={handleUpdateDescription}
             onBack={() => setCurrentScreen('home')}
             isLoading={isLoading}
           />

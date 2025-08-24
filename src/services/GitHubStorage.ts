@@ -1,5 +1,8 @@
 export interface BoxData {
-  [boxId: string]: string[];
+  [boxId: string]: {
+    items: string[];
+    description?: string;
+  };
 }
 
 export class GitHubStorage {
@@ -39,7 +42,21 @@ export class GitHubStorage {
       
       // Decode base64 content
       const content = atob(data.content);
-      return JSON.parse(content);
+      const parsed = JSON.parse(content);
+      
+      // Migrate old format (string[]) to new format ({ items: string[], description?: string })
+      const migrated: BoxData = {};
+      for (const [boxId, value] of Object.entries(parsed)) {
+        if (Array.isArray(value)) {
+          // Old format: convert string[] to { items: string[] }
+          migrated[boxId] = { items: value };
+        } else {
+          // New format: already correct
+          migrated[boxId] = value as { items: string[]; description?: string };
+        }
+      }
+      
+      return migrated;
     } catch (error) {
       console.error('Error loading box data:', error);
       // If file doesn't exist, return empty object
@@ -82,10 +99,34 @@ export class GitHubStorage {
   async getBoxItems(boxId: string): Promise<string[]> {
     try {
       const boxData = await this.getBoxData();
-      return boxData[boxId] || [];
+      return boxData[boxId]?.items || [];
     } catch (error) {
       console.error('Error getting box items:', error);
       return [];
+    }
+  }
+
+  async getBoxDescription(boxId: string): Promise<string> {
+    try {
+      const boxData = await this.getBoxData();
+      return boxData[boxId]?.description || '';
+    } catch (error) {
+      console.error('Error getting box description:', error);
+      return '';
+    }
+  }
+
+  async setBoxDescription(boxId: string, description: string): Promise<void> {
+    try {
+      const boxData = await this.getBoxData();
+      if (!boxData[boxId]) {
+        boxData[boxId] = { items: [] };
+      }
+      boxData[boxId].description = description;
+      await this.saveBoxData(boxData);
+    } catch (error) {
+      console.error('Error setting box description:', error);
+      throw error;
     }
   }
 
@@ -93,10 +134,10 @@ export class GitHubStorage {
     try {
       const boxData = await this.getBoxData();
       if (!boxData[boxId]) {
-        boxData[boxId] = [];
+        boxData[boxId] = { items: [] };
       }
-      if (!boxData[boxId].includes(item)) {
-        boxData[boxId].push(item);
+      if (!boxData[boxId].items.includes(item)) {
+        boxData[boxId].items.push(item);
         await this.saveBoxData(boxData);
       }
     } catch (error) {
@@ -109,7 +150,7 @@ export class GitHubStorage {
     try {
       const boxData = await this.getBoxData();
       if (boxData[boxId]) {
-        boxData[boxId] = boxData[boxId].filter(i => i !== item);
+        boxData[boxId].items = boxData[boxId].items.filter(i => i !== item);
         await this.saveBoxData(boxData);
       }
     } catch (error) {
