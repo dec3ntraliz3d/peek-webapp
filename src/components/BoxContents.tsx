@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useToast } from './Toast';
 
 interface BoxContentsProps {
   boxId: string;
@@ -21,12 +22,13 @@ const BoxContents: React.FC<BoxContentsProps> = ({
   onBack,
   isLoading = false
 }) => {
+  const { showToast } = useToast();
   const [newItem, setNewItem] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [removingItem, setRemovingItem] = useState<string | null>(null);
   const [editingDescription, setEditingDescription] = useState(false);
   const [tempDescription, setTempDescription] = useState(description);
-  const [descriptionError, setDescriptionError] = useState('');
+  const [isSavingDescription, setIsSavingDescription] = useState(false);
 
   const handleAddItem = async () => {
     if (!newItem.trim() || isAdding) return;
@@ -35,23 +37,23 @@ const BoxContents: React.FC<BoxContentsProps> = ({
     try {
       await onAddItem(boxId, newItem.trim());
       setNewItem('');
+      showToast('Item added', 'success');
     } catch (error) {
       console.error('Error adding item:', error);
-      alert('Failed to add item. Please try again.');
+      showToast('Failed to add item', 'error');
     } finally {
       setIsAdding(false);
     }
   };
 
   const handleRemoveItem = async (item: string) => {
-    if (!confirm(`Remove "${item}" from this box?`)) return;
-
     setRemovingItem(item);
     try {
       await onRemoveItem(boxId, item);
+      showToast('Item removed', 'success');
     } catch (error) {
       console.error('Error removing item:', error);
-      alert('Failed to remove item. Please try again.');
+      showToast('Failed to remove item', 'error');
     } finally {
       setRemovingItem(null);
     }
@@ -64,21 +66,22 @@ const BoxContents: React.FC<BoxContentsProps> = ({
   };
 
   const handleSaveDescription = async () => {
-    setDescriptionError(''); // Clear any previous errors
+    setIsSavingDescription(true);
     try {
       await onUpdateDescription(boxId, tempDescription);
       setEditingDescription(false);
+      showToast('Description saved', 'success');
     } catch (error) {
       console.error('Error updating description:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      setDescriptionError(`Error: ${errorMessage}`);
+      showToast('Failed to save description', 'error');
+    } finally {
+      setIsSavingDescription(false);
     }
   };
 
   const handleCancelDescription = () => {
     setTempDescription(description);
     setEditingDescription(false);
-    setDescriptionError(''); // Clear errors when canceling
   };
 
   // Update temp description when prop changes
@@ -93,25 +96,26 @@ const BoxContents: React.FC<BoxContentsProps> = ({
           ← Back
         </button>
         <div className="box-info">
-          <h2>📦 {boxId}</h2>
-          <span className="item-count">{items.length} items</span>
+          <h2>{boxId}</h2>
+          <span className="item-count">{items.length} item{items.length !== 1 ? 's' : ''}</span>
         </div>
+        <div style={{ width: '60px' }} />
       </div>
 
       <div className="description-section">
         <div className="description-header">
-          <label>📝 Description</label>
+          <label>Description</label>
           {!editingDescription && (
-            <button 
+            <button
               onClick={() => setEditingDescription(true)}
               className="edit-description-btn"
               title="Edit description"
             >
-              ✏️
+              Edit
             </button>
           )}
         </div>
-        
+
         {editingDescription ? (
           <div className="description-edit">
             <textarea
@@ -123,27 +127,27 @@ const BoxContents: React.FC<BoxContentsProps> = ({
               autoFocus
             />
             <div className="description-buttons">
-              <button onClick={handleSaveDescription} className="save-btn">
-                💾 Save
+              <button
+                onClick={handleSaveDescription}
+                className="save-btn"
+                disabled={isSavingDescription}
+              >
+                {isSavingDescription ? 'Saving...' : 'Save'}
               </button>
-              <button onClick={handleCancelDescription} className="cancel-btn">
-                ❌ Cancel
+              <button
+                onClick={handleCancelDescription}
+                className="cancel-btn"
+                disabled={isSavingDescription}
+              >
+                Cancel
               </button>
             </div>
-            {descriptionError && (
-              <div className="description-error">
-                <p>❌ {descriptionError}</p>
-                <button onClick={() => setDescriptionError('')} className="error-dismiss">
-                  Dismiss
-                </button>
-              </div>
-            )}
           </div>
         ) : (
           <div className="description-display">
             {description || (
               <span className="description-placeholder">
-                Click ✏️ to add a description for this box
+                No description added yet
               </span>
             )}
           </div>
@@ -161,23 +165,30 @@ const BoxContents: React.FC<BoxContentsProps> = ({
             className="item-input"
             disabled={isAdding}
           />
-          <button 
+          <button
             onClick={handleAddItem}
             disabled={!newItem.trim() || isAdding}
             className="add-btn"
           >
-            {isAdding ? '...' : '+ Add'}
+            {isAdding ? (
+              <span className="btn-spinner"></span>
+            ) : (
+              'Add'
+            )}
           </button>
         </div>
       </div>
 
       <div className="items-section">
         {isLoading ? (
-          <div className="loading">Loading items...</div>
+          <div className="loading">
+            <div className="spinner"></div>
+            <p>Loading items...</p>
+          </div>
         ) : items.length === 0 ? (
           <div className="empty-box">
-            <p>📭 This box is empty</p>
-            <p>Add your first item above!</p>
+            <p>This box is empty</p>
+            <p style={{ fontSize: '0.9rem', opacity: 0.7 }}>Add your first item above</p>
           </div>
         ) : (
           <div className="items-list">
@@ -190,7 +201,11 @@ const BoxContents: React.FC<BoxContentsProps> = ({
                   className="remove-btn"
                   aria-label={`Remove ${item}`}
                 >
-                  {removingItem === item ? '...' : '🗑️'}
+                  {removingItem === item ? (
+                    <span className="btn-spinner-small"></span>
+                  ) : (
+                    '×'
+                  )}
                 </button>
               </div>
             ))}
@@ -199,9 +214,7 @@ const BoxContents: React.FC<BoxContentsProps> = ({
       </div>
 
       <div className="box-footer">
-        <p className="sync-info">
-          💾 Changes are automatically saved to your GitHub repository
-        </p>
+        <p className="sync-info">Changes sync automatically</p>
       </div>
     </div>
   );
