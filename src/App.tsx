@@ -89,16 +89,17 @@ function App() {
 
   const renderHomeScreen = () => (
     <div className="home-container">
+      <button
+        onClick={handleSignOut}
+        className="sign-out-btn"
+        title="Sign out"
+      >
+        Sign Out
+      </button>
+
       <div className="home-header">
         <h1>Peek</h1>
         <p>Track what's inside your boxes</p>
-        <button
-          onClick={handleSignOut}
-          className="sign-out-btn"
-          title="Sign out"
-        >
-          Sign Out
-        </button>
       </div>
 
       <div className="home-actions">
