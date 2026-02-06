@@ -45,6 +45,7 @@ body {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 /* ============================================
@@ -58,7 +59,6 @@ body {
   padding: 24px;
   width: 100%;
   max-width: 480px;
-  margin: 0 auto;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
@@ -326,7 +326,6 @@ body {
   padding: 24px;
   width: 100%;
   max-width: 480px;
-  margin: 0 auto;
 }
 
 .home-header {
@@ -350,9 +349,7 @@ body {
 }
 
 .sign-out-btn {
-  position: absolute;
-  top: 24px;
-  right: 24px;
+  align-self: flex-end;
   background: none;
   border: none;
   color: var(--text-secondary);
@@ -374,7 +371,6 @@ body {
   gap: 16px;
   width: 100%;
   max-width: 400px;
-  margin: 0 auto;
 }
 
 .action-button {
@@ -465,6 +461,8 @@ body {
   color: white;
   min-height: 100vh;
   min-height: 100dvh;
+  width: 100%;
+  max-width: 480px;
 }
 
 .scanner-header {
@@ -754,7 +752,6 @@ body {
   flex-direction: column;
   padding: 24px;
   max-width: 480px;
-  margin: 0 auto;
   width: 100%;
 }
 
@@ -1038,7 +1035,6 @@ body {
   flex-direction: column;
   padding: 24px;
   max-width: 480px;
-  margin: 0 auto;
   width: 100%;
 }
 
