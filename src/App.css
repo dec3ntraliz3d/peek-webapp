@@ -31,6 +31,10 @@
   padding: 0;
 }
 
+html, body, #root {
+  width: 100%;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
   background-color: var(--bg-primary);
@@ -41,6 +45,7 @@ body {
 }
 
 .app {
+  width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
