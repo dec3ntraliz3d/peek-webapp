@@ -122,8 +122,23 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ onBack }) => {
                 margin: 10px 0; 
                 font-size: 18px;
               }
+              .close-btn {
+                display: inline-block;
+                margin-top: 20px;
+                padding: 12px 24px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                cursor: pointer;
+              }
+              .close-btn:hover {
+                background-color: #0056b3;
+              }
               @media print {
                 body { margin: 0; }
+                .close-btn { display: none; }
               }
             </style>
           </head>
@@ -132,6 +147,7 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ onBack }) => {
               <h2>Box: ${boxId}</h2>
               <img src="${dataUrl}" alt="QR Code for Box ${boxId}" />
               <p>Scan with Peek app</p>
+              <button class="close-btn" onclick="window.close()">← Close</button>
             </div>
           </body>
         </html>
