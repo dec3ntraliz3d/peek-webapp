@@ -114,23 +114,29 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ onBack }) => {
                 page-break-inside: avoid; 
                 margin-bottom: 30px;
               }
-              img { 
-                max-width: 200px; 
-                height: auto; 
+              img {
+                width: 80vw;
+                max-width: 350px;
+                height: auto;
               }
-              h2 { 
-                margin: 10px 0; 
+              h2 {
+                margin: 15px 0;
+                font-size: 24px;
+              }
+              p {
                 font-size: 18px;
+                color: #666;
               }
               .close-btn {
                 display: inline-block;
-                margin-top: 20px;
-                padding: 12px 24px;
+                margin-top: 30px;
+                padding: 16px 48px;
                 background-color: #007bff;
                 color: white;
                 border: none;
-                border-radius: 8px;
-                font-size: 16px;
+                border-radius: 12px;
+                font-size: 20px;
+                font-weight: 600;
                 cursor: pointer;
               }
               .close-btn:hover {
