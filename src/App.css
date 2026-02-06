@@ -314,19 +314,21 @@ body {
    HOME SCREEN STYLES
    ============================================ */
 .home-container {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 24px;
-  max-width: 480px;
-  margin: 0 auto;
   width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .home-header {
   text-align: center;
-  margin-bottom: 40px;
-  padding-top: 12px;
+  margin-bottom: 48px;
 }
 
 .home-header h1 {
@@ -343,28 +345,30 @@ body {
 }
 
 .sign-out-btn {
-  display: block;
-  margin-left: auto;
-  margin-bottom: 8px;
+  position: absolute;
+  top: 24px;
+  right: 24px;
   background: none;
   border: none;
   color: var(--text-secondary);
   font-size: 0.875rem;
-  padding: 8px 0;
+  padding: 8px 12px;
   cursor: pointer;
   transition: all var(--transition);
+  border-radius: var(--radius-sm);
 }
 
 .sign-out-btn:hover {
   color: var(--accent);
+  background: var(--accent-light);
 }
 
 .home-actions {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-bottom: 40px;
+  width: 100%;
+  max-width: 360px;
 }
 
 .action-button {
@@ -436,9 +440,13 @@ body {
 }
 
 .home-footer {
+  position: absolute;
+  bottom: 24px;
+  left: 0;
+  right: 0;
   text-align: center;
   color: var(--text-muted);
-  font-size: 0.875rem;
+  font-size: 0.8rem;
 }
 
 /* ============================================
